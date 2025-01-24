@@ -1,0 +1,10 @@
+{
+  "$schema": "../_spritesheet_schema.json",
+  "image_filename": "assets/images/linkle-idle-sprsht.png",
+  "width": 32,
+  "height": 42,
+  "columns": 4,
+  "rows": 3,
+  "linear_count": 10,
+  "scale_factor": 4
+}

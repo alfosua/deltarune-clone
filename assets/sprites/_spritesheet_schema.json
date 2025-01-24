@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "SpriteSheet",
+  "description": "A sprite sheet definition",
+  "type": "object",
+  "required": ["image_filename", "width", "height"],
+  "properties": {
+    "image_filename": {
+      "type": "string"
+    },
+    "width": {
+      "type": "number"
+    },
+    "height": {
+      "type": "number"
+    },
+    "columns": {
+      "type": "number"
+    },
+    "rows": {
+      "type": "number"
+    },
+    "linear_count": {
+      "type": "number"
+    },
+    "offset_x": {
+      "type": "number"
+    },
+    "offset_y": {
+      "type": "number"
+    },
+    "scale_factor": {
+      "type": "number"
+    }
+  }
+}
