@@ -2,7 +2,7 @@ import pygame
 from pygame import Surface, Vector2
 from pygame.sprite import Sprite
 
-from .resources import load_json_resource
+from .resources.json import load_json_resource
 from .transformation import TransformationData, create_transformation_zero
 
 

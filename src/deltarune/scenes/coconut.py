@@ -1,11 +1,12 @@
 import random
 from engine import *
+from .. import resources
 
 
 class Coconut(Scene):
     def load(self, context: GameContext):
         # load image used for the coconut
-        self.coconut_image = pygame.image.load("assets/images/coconut.jpg").convert()
+        self.coconut_image = pygame.image.load(resources.images.COCONUT).convert()
 
     def start(self, context: GameContext) -> None:
         # get from context

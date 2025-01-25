@@ -1,4 +1,5 @@
 from engine import *
+from .. import resources
 from ..inputs import PlayerInput
 from ..characters import Character, CharacterAction
 from ..controllers.dialogue import DialogueController
@@ -29,14 +30,14 @@ class Adventure(Scene):
     def load(self, context: GameContext):
         screen_rect = context.get_screen_rect()
 
-        self.font = Font("assets/fonts/joystix/joystix monospace.otf", 20)
-        self.name_font = Font("assets/fonts/retro_gaming/Retro Gaming.ttf", 30)
-        self.dialogue_font = Font("assets/fonts/retro_gaming/Retro Gaming.ttf", 30)
+        self.font = Font(resources.fonts.JOYSTIX_MONOSPACE, 20)
+        self.name_font = Font(resources.fonts.RETRO_GAMING, 30)
+        self.dialogue_font = Font(resources.fonts.RETRO_GAMING, 30)
 
-        self.linkle_portrait = pygame.image.load("assets/images/linkle-portrait.jpg").convert_alpha()
+        self.linkle_portrait = pygame.image.load(resources.images.LINKLE_PORTRAIT).convert_alpha()
         self.linkle_portrait = pygame.transform.scale(self.linkle_portrait, (32 * screen_rect.width // 640, 24 * screen_rect.height // 480))
 
-        self.girly_archer_sheet = sprites.load_spritesheet("assets/sprites/charas/linkle-idle.json")
+        self.girly_archer_sheet = sprites.load_spritesheet(resources.sprites.LINKLE_IDLE)
         self.girly_archer = sprites.AnimatedSprite(self.girly_archer_sheet.frames, transform=TransformationData(anchor=anchors.bottomcenter), duration=1/12)
         self.sprite_group = pygame.sprite.Group()
         self.sprite_group.add(self.girly_archer)
@@ -96,7 +97,7 @@ class Adventure(Scene):
         self.player_hitbox_pos = Vector2(0.5, 0.5)
 
         # music
-        pygame.mixer.music.load("assets/music/secret.mp3")
+        pygame.mixer.music.load(resources.music.SECRET)
         pygame.mixer.music.play(-1)
 
     def update(self, context: GameContext) -> None:

@@ -1,5 +1,6 @@
 import random
 from engine import *
+from .. import resources
 
 
 class Wip(Scene):
@@ -11,14 +12,14 @@ class Wip(Scene):
         self.font_main = pygame.font.SysFont("Arial", 24)
 
         # load image to use
-        self.image_wip = pygame.image.load("assets/images/wip.png").convert_alpha()
+        self.image_wip = pygame.image.load(resources.images.WIP).convert_alpha()
         self.image_wip = pygame.transform.scale(self.image_wip, (screen_rect.width, screen_rect.width * self.image_wip.get_height() / self.image_wip.get_width()))
         
         # pre-render texts
         self.text_press_spacebar_anytime = self.font_main.render("Press Spacebar Anytime", True, "white")
 
         # load sounds
-        self.sound_kojima = pygame.mixer.Sound("assets/sounds/kojima.mp3")
+        self.sound_kojima = pygame.mixer.Sound(resources.sounds.KOJIMA)
 
     def start(self, context: GameContext) -> None:
         # init state
@@ -26,7 +27,7 @@ class Wip(Scene):
         self.time_elapsed = 0
 
         # play secret music
-        pygame.mixer.music.load("assets/music/secret.mp3")
+        pygame.mixer.music.load(resources.music.SECRET)
         pygame.mixer.music.play(-1)
 
     def update(self, context: GameContext) -> None:
