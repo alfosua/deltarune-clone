@@ -32,7 +32,7 @@ class Wip(Scene):
     def update(self, context: GameContext) -> None:
         # get from context
         keys_down = context.get_keys_down()
-        current_time = context.get_current_scene_time()
+        current_time = context.scene.get_current_ticks()
         unescaled_current_ticks = context.get_unscaled_current_ticks()
         pause_started_at = context.get_pause_started_at()
         keys_pressed = context.get_keys_pressed()
@@ -53,7 +53,7 @@ class Wip(Scene):
         for event in context.get_events():
             if event.type == pygame.KEYDOWN:
                 if event.unicode.isnumeric():
-                    context.change_scene(int(event.unicode) - 1)
+                    context.scene.change(int(event.unicode) - 1)
 
     def draw(self, context: GameContext) -> None:
         # get from context

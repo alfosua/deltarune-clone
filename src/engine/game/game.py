@@ -3,7 +3,7 @@ from .. import pygame
 from .key_utils import create_key_tracking_dict
 from .setup import GameSetup
 from .state import GameState
-from .context import GameContext
+from .context.game import GameContext
 
 class Game:
     def __init__(self, setup: GameSetup):

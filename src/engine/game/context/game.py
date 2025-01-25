@@ -1,9 +1,15 @@
-from .state import GameState
+from .scene import SceneContext
+from ..state import GameState
 
 
 class GameContext:
     def __init__(self, state: GameState):
         self.state = state
+        self.__scene_context = SceneContext(state)
+    
+    @property
+    def scene(self):
+        return self.__scene_context
     
     def get_screen(self):
         return self.state.screen
@@ -61,29 +67,3 @@ class GameContext:
 
     def is_any_key_up(self):
         return any(value for value in self.state.keys_up.values())
-    
-    # SCENE MANAGEMENT
-    def change_scene(self, new_scene_idx):
-        self.state.next_scene_idx = new_scene_idx
-        self.state.exiting_scene = True
-
-    def get_scene_idx(self):
-        return self.state.current_scene_idx
-
-    def get_current_scene_ticks(self):
-        return self.get_current_ticks() - self.state.current_scene_started
-
-    def get_current_scene_time(self):
-        return self.get_current_scene_ticks() / 1000
-
-    def get_started_at(self):
-        return self.state.current_scene_started
-
-    def is_current(self, scene_idx):
-        return self.state.current_scene_idx == scene_idx
-
-    def is_entering_scene(self):
-        return self.state.entering_scene
-
-    def is_exiting_scene(self):
-        return self.state.exiting_scene

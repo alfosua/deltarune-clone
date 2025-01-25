@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from ..game.context import GameContext
+from ..game.context.game import GameContext
 
 
 class Scene(ABC):
