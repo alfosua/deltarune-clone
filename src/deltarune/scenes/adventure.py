@@ -1,6 +1,7 @@
 from engine import *
 from ..inputs import PlayerInput
 from ..characters import Character, CharacterAction
+from ..controllers.dialogue import DialogueController
 
 PLAYER_SPEED = 200
 PLAYER_MINIGAME_SPEED = 0.75
@@ -89,14 +90,12 @@ class Adventure(Scene):
         self.enemy_turn_minigame_started_at = 0
         # enemy minigame
         self.player_hitbox_pos = Vector2(0.5, 0.5)
-        # dialogue flow
-        self.dialogue_started_at = None
-        self.dialogue_content = ""
-        self.dialogue_duration = 0
-        self.dialogue_finished = False
 
-        # input
+        # inputs
         self.input = PlayerInput(context)
+
+        # controllers
+        self.dialogue = DialogueController()
 
         # music
         pygame.mixer.music.load("assets/music/secret.mp3")
@@ -105,6 +104,8 @@ class Adventure(Scene):
     def update(self, context: GameContext) -> None:
         current_ticks = context.get_current_scene_ticks()
         dt = context.get_delta_time()
+
+        self.dialogue.update_ticks(current_ticks)
 
         if self.current_status == STATUS_EXPLORATION:
             if self.input.is_confirm_button_down():
@@ -132,7 +133,7 @@ class Adventure(Scene):
                         self.player_turn_action_queue.append(BattleAction(caller, action))
                         self.menu_chara_cursor = min(self.menu_chara_cursor + 1, len(self.player_team) - 1)
                         self.menu_option_cursor = 0
-                        
+
                     elif self.input.is_next_button_down():
                         self.menu_option_cursor = (self.menu_option_cursor + 1) % len(self.player_team[self.menu_chara_cursor].actions)
 
@@ -148,64 +149,46 @@ class Adventure(Scene):
                     if self.player_turn_action_status == PLAYER_TURN_ACTION_STATUS_STARTING:
                         self.player_turn_action = self.player_turn_action_queue.pop(0)
                         self.player_turn_action_status = PLAYER_TURN_ACTION_STATUS_PREFACE
-                        self.dialogue_started_at = current_ticks
-                        self.dialogue_content = f"{self.player_turn_action.caller.name} will {self.player_turn_action.action.name}."
-                        self.dialogue_duration = DIALOGUE_SPEED * len(self.dialogue_content)
-                        self.dialogue_finished = False
+                        self.dialogue.start(f"{self.player_turn_action.caller.name} will {self.player_turn_action.action.name}.")
 
                     elif self.player_turn_action_status == PLAYER_TURN_ACTION_STATUS_PREFACE:
-                        if self.dialogue_finished and self.input.is_confirm_button_down():
+                        if self.dialogue.is_finished() and self.input.is_confirm_button_down():
                             self.player_turn_action_status = PLAYER_TURN_ACTION_STATUS_ANIMATION
                             self.player_turn_action_animation_started_at = current_ticks
-                            self.dialogue_started_at = None
-                            self.dialogue_content = ""
-                            self.dialogue_duration = 0
-                            self.dialogue_finished = False
-                        elif self.dialogue_started_at and current_ticks - self.dialogue_started_at > self.dialogue_duration or self.input.is_confirm_button_down():
-                            self.dialogue_finished = True
-                    
+                            self.dialogue.clear()
+                        elif self.input.is_confirm_button_down():
+                            self.dialogue.finish()
+
                     elif self.player_turn_action_status == PLAYER_TURN_ACTION_STATUS_ANIMATION:
                         if current_ticks - self.player_turn_action_animation_started_at > 2000:
                             self.player_turn_action_status = PLAYER_TURN_ACTION_STATUS_CONCLUSION
                             self.player_turn_action_animation_started_at = None
-                            self.dialogue_started_at = current_ticks
-                            self.dialogue_content = f"{self.player_turn_action.caller.name} did {self.player_turn_action.action.name}."
-                            self.dialogue_duration = DIALOGUE_SPEED * len(self.dialogue_content)
-                            self.dialogue_finished = False
+                            self.dialogue.start(f"{self.player_turn_action.caller.name} did {self.player_turn_action.action.name}.")
 
                     elif self.player_turn_action_status == PLAYER_TURN_ACTION_STATUS_CONCLUSION:
-                        if self.dialogue_finished and self.input.is_confirm_button_down():
-                            self.dialogue_started_at = None
-                            self.dialogue_content = ""
-                            self.dialogue_duration = 0
-                            self.dialogue_finished = False
+                        if self.dialogue.is_finished() and self.input.is_confirm_button_down():
+                            self.dialogue.clear()
                             if len(self.player_turn_action_queue) == 0:
                                 self.current_turn = TURN_ENEMY
                                 self.enemy_turn_status = ENEMY_TURN_STATUS_STARTING
                             else:
                                 self.player_turn_action_status = PLAYER_TURN_ACTION_STATUS_STARTING
-                        elif self.dialogue_started_at and current_ticks - self.dialogue_started_at > self.dialogue_duration or self.input.is_confirm_button_down():
-                            self.dialogue_finished = True
-            
+                        elif self.input.is_confirm_button_down():
+                            self.dialogue.finish()
+
             elif self.current_turn == TURN_ENEMY:
                     if self.enemy_turn_status == ENEMY_TURN_STATUS_STARTING:
                         self.enemy_turn_status = ENEMY_TURN_STATUS_PREFACE
-                        self.dialogue_started_at = current_ticks
-                        self.dialogue_content = f"Minion will attack! Prepare to dodge it all."
-                        self.dialogue_duration = DIALOGUE_SPEED * len(self.dialogue_content)
-                        self.dialogue_finished = False
+                        self.dialogue.start(f"Minion will attack! Prepare to dodge it all.")
 
                     elif self.enemy_turn_status == ENEMY_TURN_STATUS_PREFACE:
-                        if self.dialogue_finished and self.input.is_confirm_button_down():
+                        if self.dialogue.is_finished() and self.input.is_confirm_button_down():
                             self.enemy_turn_status = ENEMY_TURN_STATUS_MINIGAME
                             self.enemy_turn_minigame_started_at = current_ticks
                             self.player_hitbox_pos = Vector2(0.5, 0.5)
-                            self.dialogue_started_at = None
-                            self.dialogue_content = ""
-                            self.dialogue_duration = 0
-                            self.dialogue_finished = False
-                        elif self.dialogue_started_at and current_ticks - self.dialogue_started_at > self.dialogue_duration or self.input.is_confirm_button_down():
-                            self.dialogue_finished = True
+                            self.dialogue.clear()
+                        elif self.input.is_confirm_button_down():
+                            self.dialogue.finish()
                     
                     elif self.enemy_turn_status == ENEMY_TURN_STATUS_MINIGAME:
                         move_axis = self.input.get_move_axis()
@@ -218,17 +201,11 @@ class Adventure(Scene):
                         if current_ticks - self.enemy_turn_minigame_started_at > 10000:
                             self.enemy_turn_status = ENEMY_TURN_STATUS_CONCLUSION
                             self.enemy_turn_minigame_started_at = 0
-                            self.dialogue_started_at = current_ticks
-                            self.dialogue_content = f"Minion did attack."
-                            self.dialogue_duration = DIALOGUE_SPEED * len(self.dialogue_content)
-                            self.dialogue_finished = False
+                            self.dialogue.start(f"Minion did attack.")
 
                     elif self.enemy_turn_status == ENEMY_TURN_STATUS_CONCLUSION:
-                        if self.dialogue_finished and self.input.is_confirm_button_down():
-                            self.dialogue_started_at = None
-                            self.dialogue_content = ""
-                            self.dialogue_duration = 0
-                            self.dialogue_finished = False
+                        if self.dialogue.is_finished() and self.input.is_confirm_button_down():
+                            self.dialogue.clear()
                             if len(self.player_turn_action_queue) == 0:
                                 self.current_turn = TURN_PLAYER
                                 self.player_turn_status = PLAYER_TURN_STATUS_STRATEGY
@@ -236,9 +213,8 @@ class Adventure(Scene):
                                 self.menu_option_cursor = 0
                             else:
                                 self.player_turn_action_status = PLAYER_TURN_ACTION_STATUS_STARTING
-                        elif self.dialogue_started_at and current_ticks - self.dialogue_started_at > self.dialogue_duration or self.input.is_confirm_button_down():
-                            self.dialogue_finished = True
-                
+                        elif self.input.is_confirm_button_down():
+                            self.dialogue.finish()
 
         self.girly_archer.set_position(self.player_pos)
         self.sprite_group.update(dt)
@@ -257,10 +233,10 @@ class Adventure(Scene):
             dialogue_box_top = screen_rect.bottom - dialogue_box_height
             dialogue_box_left = screen_rect.left
             pygame.draw.line(screen, surface_border_color, (screen_rect.left, dialogue_box_top), (screen_rect.right, dialogue_box_top), 2 * screen_ratio)
-            if self.dialogue_started_at:
-                dialogue_ticks = current_ticks - self.dialogue_started_at
-                dialogue_target = min(dialogue_ticks * len(self.dialogue_content) // self.dialogue_duration, len(self.dialogue_content))
-                dialogue_slice = self.dialogue_content if self.dialogue_finished else self.dialogue_content[:dialogue_target]
+            if self.dialogue.started_at:
+                dialogue_ticks = current_ticks - self.dialogue.started_at
+                dialogue_target = min(dialogue_ticks * len(self.dialogue.content) // self.dialogue.duration, len(self.dialogue.content))
+                dialogue_slice = self.dialogue.content if self.dialogue.finished else self.dialogue.content[:dialogue_target]
                 dialogue_text = self.dialogue_font.render(dialogue_slice, False, "white")
                 screen.blit(dialogue_text, (dialogue_box_left + 32 * screen_ratio, dialogue_box_top + 16 * screen_ratio))
 
